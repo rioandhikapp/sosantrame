@@ -1,20 +1,25 @@
 import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
-
 import mysql from 'mysql2/promise';
 
 // Koneksi ke Supabase (PostgreSQL)
 const supabase = createClient(
   'https://dnlmqwcsbdytrgshosyh.supabase.co',
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRubG1xd2NzYmR5dHJnc2hvc3loIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTAwNjY2MTAsImV4cCI6MjA2NTY0MjYxMH0.Z88PYt3Hq3QA4ZY2yqUmbb8AKdmyAd0tP6CcXFguZI'
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRubG1xd2NzYmR5dHJnc2hvc3loIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTAwNjY2MTAsImV4cCI6MjA2NTY0MjYxMH0.Z88PYt3Hq3QAQ4ZY2yqUmbb8AKdmyAd0tP6CcXFguZI'
 );
 
 // Koneksi ke MySQL
-const mysqlConnection = await mysql.createConnection({
-  host: 'localhost',
-  user: 'root', // User default untuk XAMPP
-  password: '', // Password default biasanya kosong
-  database: 'event_management' // Ganti dengan nama database Anda
-});
+let mysqlConnection;
+try {
+  mysqlConnection = await mysql.createConnection({
+    host: 'localhost',
+    user: 'root', // User default untuk XAMPP
+    password: '', // Password default biasanya kosong
+    database: 'event_management' // Ganti dengan nama database Anda
+  });
+  console.log("Koneksi MySQL berhasil");
+} catch (error) {
+  console.error("Koneksi MySQL gagal:", error.message);
+}
 
 // Get elements for wizard and display
 const eventNameInput = document.getElementById('eventName');
@@ -158,16 +163,22 @@ createEventForm.addEventListener('submit', async (e) => {
   const { data: pgData, error: pgError } = await supabase.from("event").insert([{ eventName, guestName, guestIG }]).select();
   if (pgError) {
     alert("Gagal menambahkan data ke PostgreSQL: " + pgError.message);
-  } else {
-    alert("Berhasil membuat acara di PostgreSQL!");
+    return; // Hentikan eksekusi jika gagal
   }
 
   // Insert into MySQL
-  const [mysqlResult] = await mysqlConnection.execute('INSERT INTO event (eventName, guestName, guestIG) VALUES (?, ?, ?)', [eventName, guestName, guestIG]);
-  if (mysqlResult.affectedRows > 0) {
-    alert("Berhasil membuat acara di MySQL!");
+  try {
+    const [mysqlResult] = await mysqlConnection.execute('INSERT INTO event (eventName, guestName, guestIG) VALUES (?, ?, ?)', [eventName, guestName, guestIG]);
+    if (mysqlResult.affectedRows > 0) {
+      alert("Berhasil membuat acara di MySQL!");
+    } else {
+      alert("Gagal menyimpan data di MySQL.");
+    }
+  } catch (error) {
+    alert("Gagal menambahkan data ke MySQL: " + error.message);
   }
 
+  // Reset input fields
   guestNameInput.value = '';
   guestIGInput.value = '';
   viewAllDataBtn.classList.remove('hidden');
