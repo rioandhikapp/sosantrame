@@ -1,13 +1,17 @@
-// Tambahkan ini di <head> HTML:
-// <script src="https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.6.2/sql-wasm.js"></script>
-
-import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
+import { createClient as createSupabaseClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
+import { createClient as createTursoClient } from "@libsql/client/web";
 
 // Koneksi ke Supabase (PostgreSQL)
-const supabase = createClient(
+const supabase = createSupabaseClient(
   'https://dnlmqwcsbdytrgshosyh.supabase.co',
   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRubG1xd2NzYmR5dHJnc2hvc3loIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTAwNjY2MTAsImV4cCI6MjA2NTY0MjYxMH0.Z88PYt3Hq3QAQ4ZY2yqUmbb8AKdmyAd0tP6CcXFguZI'
 );
+
+// Koneksi ke Turso (libSQL SQLite Cloud)
+const turso = createTursoClient({
+  url: "libsql://database-rose-xylophone-vercel-icfg-px5zvgecm5fnewefqlbnewsu.aws-us-east-1.turso.io",
+  authToken: "eyJhbGciOiJFZERTQSIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE3NTIxMjk3NTQsImlkIjoiM2YxODk4OTUtMzM2Mi00MDBjLWJhOGMtYTVhZmZmMTkwMzM3IiwicmlkIjoiMGIyZmZiMzgtOGE1NS00N2QzLTk0MjYtMmZjYzE1MmU2NjQ5In0.xPL3XrCgzyrVMiywoMWx9DERrg_w7oWveNHy-A55MM2D515p_udGj58THVaALDSwi5e1ZC1OLH_mHt2p-3tvCw"
+});
 
 // Inisialisasi SQLite di browser
 let SQL, db;
@@ -23,7 +27,6 @@ const SQL_READY = initSqlJs({
   )`);
   console.log("SQLite siap digunakan");
 
-  // Jika ada file tersimpan sebelumnya di localStorage
   const saved = localStorage.getItem('sqliteBackup');
   if (saved) {
     db = new SQL.Database(new Uint8Array(JSON.parse(saved)));
@@ -34,15 +37,6 @@ const SQL_READY = initSqlJs({
 function saveSQLiteToDisk() {
   const binaryArray = db.export();
   localStorage.setItem('sqliteBackup', JSON.stringify(Array.from(binaryArray)));
-
-  const blob = new Blob([binaryArray], { type: "application/octet-stream" });
-  const url = URL.createObjectURL(blob);
-
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = "event_data.sqlite";
-  a.click();
-  URL.revokeObjectURL(url);
 }
 
 // Get elements
@@ -59,7 +53,6 @@ const eventDisplayContainer = document.getElementById('eventDisplayContainer');
 const eventFormContainer = document.getElementById('eventFormContainer');
 const createNewEventBtn = document.getElementById('createNewEventBtn');
 const viewAllDataBtn = document.getElementById('viewAllDataBtn');
-const downloadSQLiteBtn = document.getElementById('downloadSQLiteBtn');
 
 const tab1Btn = document.getElementById('tab1Btn');
 const tab2Btn = document.getElementById('tab2Btn');
@@ -190,8 +183,4 @@ createNewEventBtn.addEventListener('click', () => {
 
 viewAllDataBtn.addEventListener('click', () => {
   displayAllEvents();
-});
-
-downloadSQLiteBtn.addEventListener('click', () => {
-  saveSQLiteToDisk();
 });
