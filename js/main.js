@@ -27,10 +27,22 @@ const SQL_READY = initSqlJs({
   }
 });
 
-function saveSQLiteToDisk() {
-  const binaryArray = db.export();
-  localStorage.setItem('sqliteBackup', JSON.stringify(Array.from(binaryArray)));
+function downloadSQLiteFile() {
+  const binaryArray = db.export(); // Ekspor database dalam bentuk Uint8Array
+  const blob = new Blob([binaryArray], { type: 'application/octet-stream' }); // Buat blob
+  const url = URL.createObjectURL(blob); // Buat URL sementara
+
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'data_event.sqlite'; // Nama file yang diunduh
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url); // Bersihkan URL blob
+
+  console.log("Database SQLite berhasil diunduh.");
 }
+
 
 // Get elements
 const eventNameInput = document.getElementById('eventName');
@@ -175,4 +187,9 @@ createNewEventBtn.addEventListener('click', () => {
 
 viewAllDataBtn.addEventListener('click', () => {
   displayAllEvents();
+});
+const downloadSQLiteBtn = document.getElementById('downloadSQLiteBtn');
+downloadSQLiteBtn.addEventListener('click', async () => {
+  await SQL_READY;
+  downloadSQLiteFile();
 });
