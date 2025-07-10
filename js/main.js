@@ -1,3 +1,6 @@
+// Tambahkan ini di <head> HTML:
+// <script src="https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.6.2/sql-wasm.js"></script>
+
 import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
 
 // Koneksi ke Supabase (PostgreSQL)
@@ -56,6 +59,7 @@ const eventDisplayContainer = document.getElementById('eventDisplayContainer');
 const eventFormContainer = document.getElementById('eventFormContainer');
 const createNewEventBtn = document.getElementById('createNewEventBtn');
 const viewAllDataBtn = document.getElementById('viewAllDataBtn');
+const downloadSQLiteBtn = document.getElementById('downloadSQLiteBtn');
 
 const tab1Btn = document.getElementById('tab1Btn');
 const tab2Btn = document.getElementById('tab2Btn');
@@ -105,24 +109,6 @@ async function displayAllEvents() {
           <td class="py-2 px-4 border-b border-gray-200">${event.eventName}</td>
           <td class="py-2 px-4 border-b border-gray-200">${event.guestName}</td>
           <td class="py-2 px-4 border-b border-gray-200">${event.guestIG}</td>
-          <td class="py-2 px-4 border-b border-gray-200 text-xs text-gray-500">[SUPABASE]</td>
-        </tr>
-      `;
-      eventListBody.insertAdjacentHTML('beforeend', row);
-    });
-  }
-
-  await SQL_READY;
-  const result = db.exec("SELECT * FROM event");
-  if (result.length > 0) {
-    const rows = result[0].values;
-    rows.forEach(([eventName, guestName, guestIG]) => {
-      const row = `
-        <tr class="bg-gray-50">
-          <td class="py-2 px-4 border-b border-gray-200">${eventName}</td>
-          <td class="py-2 px-4 border-b border-gray-200">${guestName}</td>
-          <td class="py-2 px-4 border-b border-gray-200">${guestIG}</td>
-          <td class="py-2 px-4 border-b border-gray-200 text-xs text-gray-500">[SQLITE]</td>
         </tr>
       `;
       eventListBody.insertAdjacentHTML('beforeend', row);
@@ -204,4 +190,8 @@ createNewEventBtn.addEventListener('click', () => {
 
 viewAllDataBtn.addEventListener('click', () => {
   displayAllEvents();
+});
+
+downloadSQLiteBtn.addEventListener('click', () => {
+  saveSQLiteToDisk();
 });
