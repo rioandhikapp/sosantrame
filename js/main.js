@@ -1,6 +1,3 @@
-// Tambahkan ini di <head> HTML:
-// <script src="https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.6.2/sql-wasm.js"></script>
-
 import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
 
 // Koneksi ke Supabase (PostgreSQL)
@@ -22,7 +19,28 @@ const SQL_READY = initSqlJs({
     guestIG TEXT
   )`);
   console.log("SQLite siap digunakan");
+
+  // Jika ada file tersimpan sebelumnya di localStorage
+  const saved = localStorage.getItem('sqliteBackup');
+  if (saved) {
+    db = new SQL.Database(new Uint8Array(JSON.parse(saved)));
+    console.log("Database SQLite dipulihkan dari penyimpanan lokal");
+  }
 });
+
+function saveSQLiteToDisk() {
+  const binaryArray = db.export();
+  localStorage.setItem('sqliteBackup', JSON.stringify(Array.from(binaryArray)));
+
+  const blob = new Blob([binaryArray], { type: "application/octet-stream" });
+  const url = URL.createObjectURL(blob);
+
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "event_data.sqlite";
+  a.click();
+  URL.revokeObjectURL(url);
+}
 
 // Get elements
 const eventNameInput = document.getElementById('eventName');
@@ -87,12 +105,29 @@ async function displayAllEvents() {
           <td class="py-2 px-4 border-b border-gray-200">${event.eventName}</td>
           <td class="py-2 px-4 border-b border-gray-200">${event.guestName}</td>
           <td class="py-2 px-4 border-b border-gray-200">${event.guestIG}</td>
+          <td class="py-2 px-4 border-b border-gray-200 text-xs text-gray-500">[SUPABASE]</td>
         </tr>
       `;
       eventListBody.insertAdjacentHTML('beforeend', row);
     });
   }
 
+  await SQL_READY;
+  const result = db.exec("SELECT * FROM event");
+  if (result.length > 0) {
+    const rows = result[0].values;
+    rows.forEach(([eventName, guestName, guestIG]) => {
+      const row = `
+        <tr class="bg-gray-50">
+          <td class="py-2 px-4 border-b border-gray-200">${eventName}</td>
+          <td class="py-2 px-4 border-b border-gray-200">${guestName}</td>
+          <td class="py-2 px-4 border-b border-gray-200">${guestIG}</td>
+          <td class="py-2 px-4 border-b border-gray-200 text-xs text-gray-500">[SQLITE]</td>
+        </tr>
+      `;
+      eventListBody.insertAdjacentHTML('beforeend', row);
+    });
+  }
 
   if (eventListBody.innerHTML === '') {
     eventListBody.innerHTML = '<tr><td colspan="4" class="py-4 text-center text-kopi">Belum ada acara yang dibuat.</td></tr>';
@@ -150,7 +185,8 @@ createEventForm.addEventListener('submit', async (e) => {
 
   await SQL_READY;
   db.run("INSERT INTO event (eventName, guestName, guestIG) VALUES (?, ?, ?)", [eventName, guestName, guestIG]);
-  console.log("Berhasil disimpan ke SQLite");
+  saveSQLiteToDisk();
+  console.log("Berhasil disimpan ke SQLite dan disimpan ke penyimpanan lokal");
 
   guestNameInput.value = '';
   guestIGInput.value = '';
