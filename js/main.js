@@ -1,5 +1,5 @@
 import { createClient as createSupabaseClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
-import { createClient as createTursoClient } from "@libsql/client/web";
+import { createClient as createTursoClient } from "@libsql/client";
 
 // Koneksi ke Supabase (PostgreSQL)
 const supabase = createSupabaseClient(
