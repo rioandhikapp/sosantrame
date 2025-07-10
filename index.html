@@ -40,7 +40,8 @@
 <body class="min-h-screen bg-kertas text-kayu flex items-center justify-center px-4">
   <main class="w-full max-w-xl space-y-6 flex flex-col items-center justify-center text-center" id="mainContent">
 
-    <div class="bg-emas/90 text-kayu font-klasik text-center text-3xl md:text-4xl p-6 rounded-2xl shadow-lg border border-emas w-full">
+    <div
+      class="bg-emas/90 text-kayu font-klasik text-center text-3xl md:text-4xl p-6 rounded-2xl shadow-lg border border-emas w-full">
       Selamat Datang di <span class="italic">Sosantra</span>
     </div>
 
@@ -50,16 +51,20 @@
         <table class="min-w-full bg-white border border-gray-200 rounded-md">
           <thead>
             <tr>
-              <th class="py-2 px-10 border-b border-gray-200 bg-gray-100 text-left text-sm font-semibold text-kopi">Judul Acara</th>
-              <th class="py-2 px-10 border-b border-gray-200 bg-gray-100 text-left text-sm font-semibold text-kopi">Nama Anda</th>
-              <th class="py-2 px-10 border-b border-gray-200 bg-gray-100 text-left text-sm font-semibold text-kopi">Instagram</th>
+              <th class="py-2 px-10 border-b border-gray-200 bg-gray-100 text-left text-sm font-semibold text-kopi">
+                Judul Acara</th>
+              <th class="py-2 px-10 border-b border-gray-200 bg-gray-100 text-left text-sm font-semibold text-kopi">Nama
+                Anda</th>
+              <th class="py-2 px-10 border-b border-gray-200 bg-gray-100 text-left text-sm font-semibold text-kopi">
+                Instagram</th>
             </tr>
           </thead>
           <tbody id="eventListBody">
-            </tbody>
+          </tbody>
         </table>
       </div>
-      <button type="button" id="createNewEventBtn" class="mt-6 w-full bg-kopi text-white py-2 rounded-md hover:bg-[#5c3d2b] transition">
+      <button type="button" id="createNewEventBtn"
+        class="mt-6 w-full bg-kopi text-white py-2 rounded-md hover:bg-[#5c3d2b] transition">
         Tambah Acara Baru
       </button>
     </div>
@@ -72,8 +77,12 @@
       </div>
 
       <div class="flex justify-center mb-6 space-x-4">
-        <button id="tab1Btn" class="px-4 py-2 rounded-md transition-colors duration-200 text-sm font-medium bg-kopi text-white">1. Judul</button>
-        <button id="tab2Btn" class="px-4 py-2 rounded-md transition-colors duration-200 text-sm font-medium bg-emas text-kayu hover:bg-kopi hover:text-white">2. Data Tamu</button>
+        <button id="tab1Btn"
+          class="px-4 py-2 rounded-md transition-colors duration-200 text-sm font-medium bg-kopi text-white">1.
+          Judul</button>
+        <button id="tab2Btn"
+          class="px-4 py-2 rounded-md transition-colors duration-200 text-sm font-medium bg-emas text-kayu hover:bg-kopi hover:text-white">2.
+          Data Tamu</button>
       </div>
 
       <form id="createEventForm" class="space-y-4 text-left">
@@ -82,7 +91,8 @@
           <input type="text" id="eventName" required
             class="w-full px-4 py-2 border border-emas rounded-md bg-[#fffdf8] focus:outline-none focus:ring-2 focus:ring-kopi"
             placeholder="Masukkan Judul Acara" />
-          <button type="button" id="nextToStep2" class="mt-6 w-full bg-kopi text-white py-2 rounded-md hover:bg-[#5c3d2b] transition">
+          <button type="button" id="nextToStep2"
+            class="mt-6 w-full bg-kopi text-white py-2 rounded-md hover:bg-[#5c3d2b] transition">
             Selanjutnya
           </button>
         </div>
@@ -100,13 +110,15 @@
               class="w-full px-4 py-2 border border-emas rounded-md bg-[#fffdf8] focus:outline-none focus:ring-2 focus:ring-kopi"
               placeholder="Cth: @usernameanda" />
           </div>
-          <button type="button" id="prevToStep1" class="mt-6 w-full bg-emas text-kayu py-2 rounded-md hover:bg-kopi hover:text-white transition mb-2">
+          <button type="button" id="prevToStep1"
+            class="mt-6 w-full bg-emas text-kayu py-2 rounded-md hover:bg-kopi hover:text-white transition mb-2">
             Kembali
           </button>
           <button type="submit" class="w-full bg-kopi text-white py-2 rounded-md hover:bg-[#5c3d2b] transition">
             Buat Acara
           </button>
-          <button type="button" id="viewAllDataBtn" class="mt-4 w-full bg-kayu text-white py-2 rounded-md hover:bg-kopi transition hidden">
+          <button type="button" id="viewAllDataBtn"
+            class="mt-4 w-full bg-kayu text-white py-2 rounded-md hover:bg-kopi transition hidden">
             Lihat Data
           </button>
         </div>
@@ -115,6 +127,8 @@
 
   </main>
   <script type="module" src="/js/main.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm" type="module"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.6.2/sql-wasm.js"></script>
 </body>
 
 </html>
