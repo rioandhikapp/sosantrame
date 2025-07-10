@@ -1,14 +1,25 @@
 import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
 
+import mysql from 'mysql2/promise';
+
+// Koneksi ke Supabase (PostgreSQL)
 const supabase = createClient(
   'https://dnlmqwcsbdytrgshosyh.supabase.co',
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRubG1xd2NzYmR5dHJnc2hvc3loIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTAwNjY2MTAsImV4cCI6MjA2NTY0MjYxMH0.Z88PYt3Hq3QAQ4ZY2yqUmbb8AKdmyAd0tP6CcXFguZI'
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRubG1xd2NzYmR5dHJnc2hvc3loIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTAwNjY2MTAsImV4cCI6MjA2NTY0MjYxMH0.Z88PYt3Hq3QA4ZY2yqUmbb8AKdmyAd0tP6CcXFguZI'
 );
 
+// Koneksi ke MySQL
+const mysqlConnection = await mysql.createConnection({
+  host: 'localhost',
+  user: 'root', // User default untuk XAMPP
+  password: '', // Password default biasanya kosong
+  database: 'event_management' // Ganti dengan nama database Anda
+});
+
 // Get elements for wizard and display
-const eventNameInput = document.getElementById('eventName'); // Get the event name input
-const guestNameInput = document.getElementById('guestName'); // Get the guest name input
-const guestIGInput = document.getElementById('guestIG');     // Get the guest IG input
+const eventNameInput = document.getElementById('eventName');
+const guestNameInput = document.getElementById('guestName');
+const guestIGInput = document.getElementById('guestIG');
 
 const step1 = document.getElementById('step1');
 const step2 = document.getElementById('step2');
@@ -17,19 +28,17 @@ const prevToStep1Btn = document.getElementById('prevToStep1');
 const createEventForm = document.getElementById('createEventForm');
 const eventDisplayContainer = document.getElementById('eventDisplayContainer');
 const eventFormContainer = document.getElementById('eventFormContainer');
-const createNewEventBtn = document.getElementById('createNewEventBtn'); // ID tombol diubah di HTML
-const viewAllDataBtn = document.getElementById('viewAllDataBtn'); // Tombol baru "Lihat Data"
+const createNewEventBtn = document.getElementById('createNewEventBtn');
+const viewAllDataBtn = document.getElementById('viewAllDataBtn');
 
 const tab1Btn = document.getElementById('tab1Btn');
 const tab2Btn = document.getElementById('tab2Btn');
 
 const eventListBody = document.getElementById('eventListBody');
 
-let currentStep = 1; // Keep track of the current form step
+let currentStep = 1;
 
-// ---
 // Fungsi untuk menampilkan/menyembunyikan langkah-langkah form
-// ---
 function showStep(stepNumber) {
   if (stepNumber === 1) {
     step1.classList.remove('hidden');
@@ -42,9 +51,7 @@ function showStep(stepNumber) {
   updateTabStyles();
 }
 
-// ---
 // Fungsi untuk update gaya tab navigasi
-// ---
 function updateTabStyles() {
   if (currentStep === 1) {
     tab1Btn.classList.add('bg-kopi', 'text-white');
@@ -59,24 +66,19 @@ function updateTabStyles() {
   }
 }
 
-// ---
 // Fungsi untuk menampilkan semua data acara di tabel
-// ---
 async function displayAllEvents() {
-  eventListBody.innerHTML = ''; // Kosongkan tabel sebelum mengisi ulang
+  eventListBody.innerHTML = '';
 
-  const { data: events, error } = await supabase
+  // Ambil data dari PostgreSQL
+  const { data: pgEvents, error: pgError } = await supabase
     .from('event')
-    .select('eventName, guestName, guestIG')
+    .select('eventName, guestName, guestIG');
 
-  if (error) {
-    console.error("Error loading all events:", error.message);
-    eventListBody.innerHTML = '<tr><td colspan="3" class="py-4 text-center text-kopi">Gagal memuat data acara.</td></tr>';
-    return;
-  }
-
-  if (events && events.length > 0) {
-    events.forEach(event => {
+  if (pgError) {
+    console.error("Error loading events from PostgreSQL:", pgError.message);
+  } else {
+    pgEvents.forEach(event => {
       const row = `
         <tr>
           <td class="py-2 px-4 border-b border-gray-200">${event.eventName}</td>
@@ -86,24 +88,33 @@ async function displayAllEvents() {
       `;
       eventListBody.insertAdjacentHTML('beforeend', row);
     });
-  } else {
+  }
+
+  // Ambil data dari MySQL
+  const [mysqlEvents] = await mysqlConnection.query('SELECT eventName, guestName, guestIG FROM event');
+  mysqlEvents.forEach(event => {
+    const row = `
+      <tr>
+        <td class="py-2 px-4 border-b border-gray-200">${event.eventName}</td>
+        <td class="py-2 px-4 border-b border-gray-200">${event.guestName}</td>
+        <td class="py-2 px-4 border-b border-gray-200">${event.guestIG}</td>
+      </tr>
+    `;
+    eventListBody.insertAdjacentHTML('beforeend', row);
+  });
+
+  if (eventListBody.innerHTML === '') {
     eventListBody.innerHTML = '<tr><td colspan="3" class="py-4 text-center text-kopi">Belum ada acara yang dibuat.</td></tr>';
   }
 
-  // Sembunyikan form dan tampilkan daftar acara
   eventFormContainer.classList.add('hidden');
   eventDisplayContainer.classList.remove('hidden');
 }
 
-// ---
 // Panggil fungsi displayAllEvents saat halaman dimuat
-// ---
 document.addEventListener('DOMContentLoaded', displayAllEvents);
 
-
-// ---
 // Event Listeners untuk navigasi form wizard
-// ---
 nextToStep2Btn.addEventListener('click', () => {
   const eventName = eventNameInput.value;
   if (eventName.trim() === '') {
@@ -130,9 +141,7 @@ tab2Btn.addEventListener('click', () => {
   showStep(2);
 });
 
-// ---
 // Event Listener untuk submit form
-// ---
 createEventForm.addEventListener('submit', async (e) => {
   e.preventDefault();
 
@@ -145,49 +154,41 @@ createEventForm.addEventListener('submit', async (e) => {
     return;
   }
 
-  const { data, error } = await supabase.from("event").insert([{ eventName, guestName, guestIG }]).select();
-
-  if (error) {
-    alert("Gagal menambahkan data: " + error.message);
+  // Insert into PostgreSQL
+  const { data: pgData, error: pgError } = await supabase.from("event").insert([{ eventName, guestName, guestIG }]).select();
+  if (pgError) {
+    alert("Gagal menambahkan data ke PostgreSQL: " + pgError.message);
   } else {
-    alert("Berhasil membuat acara!");
-    // Hanya kosongkan input guestName dan guestIG
-    guestNameInput.value = '';
-    guestIGInput.value = '';
-
-    // Tampilkan tombol "Lihat Data" setelah submit berhasil
-    viewAllDataBtn.classList.remove('hidden');
-
-    // Tetap di halaman tab 2
-    // Tidak perlu panggil displayAllEvents() di sini
-    // showStep(2) sudah otomatis aktif karena form tetap di step 2
+    alert("Berhasil membuat acara di PostgreSQL!");
   }
-});
 
-// ---
-// Event Listener untuk tombol "Tambah Acara Baru" (dari halaman daftar data)
-// ---
-createNewEventBtn.addEventListener('click', () => {
-  // Sembunyikan daftar acara, tampilkan form
-  eventDisplayContainer.classList.add('hidden');
-  eventFormContainer.classList.remove('hidden');
+  // Insert into MySQL
+  const [mysqlResult] = await mysqlConnection.execute('INSERT INTO event (eventName, guestName, guestIG) VALUES (?, ?, ?)', [eventName, guestName, guestIG]);
+  if (mysqlResult.affectedRows > 0) {
+    alert("Berhasil membuat acara di MySQL!");
+  }
 
-  // Reset form untuk acara baru, tapi Judul Acara bisa tetap ada jika diisi sebelumnya
-  // eventNameInput.value = ''; // Jangan dikosongkan jika ingin old value di judul
   guestNameInput.value = '';
   guestIGInput.value = '';
+  viewAllDataBtn.classList.remove('hidden');
+});
 
-  // Sembunyikan tombol "Lihat Data" saat memulai form baru
+// Event Listener untuk tombol "Tambah Acara Baru"
+createNewEventBtn.addEventListener('click', () => {
+  eventDisplayContainer.classList.add('hidden');
+  eventFormContainer.classList.remove('hidden');
+  guestNameInput.value = '';
+  guestIGInput.value = '';
   viewAllDataBtn.classList.add('hidden');
-
-  // Pastikan form kembali ke langkah 1
   showStep(1);
 });
 
-// ---
-// Event Listener untuk tombol "Lihat Data" (dari halaman form wizard)
-// ---
+// Event Listener untuk tombol "Lihat Data"
 viewAllDataBtn.addEventListener('click', () => {
-  // Muat ulang dan tampilkan semua acara
   displayAllEvents();
+});
+
+// Tutup koneksi MySQL saat aplikasi selesai
+window.addEventListener('beforeunload', async () => {
+  await mysqlConnection.end();
 });
