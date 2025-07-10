@@ -83,10 +83,11 @@ async function displayAllEvents() {
   } else {
     pgEvents.forEach(event => {
       const row = `
-        <tr>
+        <tr class="bg-white">
           <td class="py-2 px-4 border-b border-gray-200">${event.eventName}</td>
           <td class="py-2 px-4 border-b border-gray-200">${event.guestName}</td>
           <td class="py-2 px-4 border-b border-gray-200">${event.guestIG}</td>
+          <td class="py-2 px-4 border-b border-gray-200 text-xs text-gray-500">[SUPABASE]</td>
         </tr>
       `;
       eventListBody.insertAdjacentHTML('beforeend', row);
@@ -99,10 +100,11 @@ async function displayAllEvents() {
     const rows = result[0].values;
     rows.forEach(([eventName, guestName, guestIG]) => {
       const row = `
-        <tr>
+        <tr class="bg-gray-50">
           <td class="py-2 px-4 border-b border-gray-200">${eventName}</td>
           <td class="py-2 px-4 border-b border-gray-200">${guestName}</td>
           <td class="py-2 px-4 border-b border-gray-200">${guestIG}</td>
+          <td class="py-2 px-4 border-b border-gray-200 text-xs text-gray-500">[SQLITE]</td>
         </tr>
       `;
       eventListBody.insertAdjacentHTML('beforeend', row);
@@ -110,7 +112,7 @@ async function displayAllEvents() {
   }
 
   if (eventListBody.innerHTML === '') {
-    eventListBody.innerHTML = '<tr><td colspan="3" class="py-4 text-center text-kopi">Belum ada acara yang dibuat.</td></tr>';
+    eventListBody.innerHTML = '<tr><td colspan="4" class="py-4 text-center text-kopi">Belum ada acara yang dibuat.</td></tr>';
   }
 
   eventFormContainer.classList.add('hidden');
