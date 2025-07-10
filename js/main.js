@@ -1,17 +1,10 @@
-import { createClient as createSupabaseClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
-import { createClient as createTursoClient } from "@libsql/client";
+import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
 
 // Koneksi ke Supabase (PostgreSQL)
-const supabase = createSupabaseClient(
+const supabase = createClient(
   'https://dnlmqwcsbdytrgshosyh.supabase.co',
   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRubG1xd2NzYmR5dHJnc2hvc3loIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTAwNjY2MTAsImV4cCI6MjA2NTY0MjYxMH0.Z88PYt3Hq3QAQ4ZY2yqUmbb8AKdmyAd0tP6CcXFguZI'
 );
-
-// Koneksi ke Turso (libSQL SQLite Cloud)
-const turso = createTursoClient({
-  url: "libsql://database-rose-xylophone-vercel-icfg-px5zvgecm5fnewefqlbnewsu.aws-us-east-1.turso.io",
-  authToken: "eyJhbGciOiJFZERTQSIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE3NTIxMjk3NTQsImlkIjoiM2YxODk4OTUtMzM2Mi00MDBjLWJhOGMtYTVhZmZmMTkwMzM3IiwicmlkIjoiMGIyZmZiMzgtOGE1NS00N2QzLTk0MjYtMmZjYzE1MmU2NjQ5In0.xPL3XrCgzyrVMiywoMWx9DERrg_w7oWveNHy-A55MM2D515p_udGj58THVaALDSwi5e1ZC1OLH_mHt2p-3tvCw"
-});
 
 // Inisialisasi SQLite di browser
 let SQL, db;
@@ -164,7 +157,6 @@ createEventForm.addEventListener('submit', async (e) => {
 
   await SQL_READY;
   db.run("INSERT INTO event (eventName, guestName, guestIG) VALUES (?, ?, ?)", [eventName, guestName, guestIG]);
-  saveSQLiteToDisk();
   console.log("Berhasil disimpan ke SQLite dan disimpan ke penyimpanan lokal");
 
   guestNameInput.value = '';
